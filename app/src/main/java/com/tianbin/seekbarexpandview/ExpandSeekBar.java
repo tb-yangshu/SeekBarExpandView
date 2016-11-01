@@ -59,8 +59,8 @@ public class ExpandSeekBar extends FrameLayout {
         View background = LayoutInflater.from(getContext()).inflate(R.layout.layout_seekbar_background, this, false);
         LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, dip2px(4));
         layoutParams.gravity = Gravity.CENTER_VERTICAL;
-        layoutParams.leftMargin = getSeekBarPaddingLeft();
-        layoutParams.rightMargin = getSeekBarPaddingRight();
+        layoutParams.leftMargin = getBackgroundLeftMargin();
+        layoutParams.rightMargin = getBackgroundRightMargin();
         background.setLayoutParams(layoutParams);
         addView(background);
     }
@@ -75,6 +75,9 @@ public class ExpandSeekBar extends FrameLayout {
         return getSeekBarPaddingLeft() + getThunbOffset() / 2;
     }
 
+    private int getBackgroundRightMargin() {
+        return getSeekBarPaddingRight() + getThunbOffset() / 2;
+    }
 
     public int getThunbOffset() {
         return mSeekBar.getThumbOffset();
