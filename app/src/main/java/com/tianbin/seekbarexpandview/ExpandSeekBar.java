@@ -1,11 +1,11 @@
 package com.tianbin.seekbarexpandview;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -19,7 +19,12 @@ import android.widget.SeekBar;
  */
 public class ExpandSeekBar extends FrameLayout {
 
+    private final int mDefaultBackgroundHeight = dip2px(4);
+
     private SeekBar mSeekBar;
+    private int thumbDrawableWidth;
+    private int mBackgroundHeight;
+    private Drawable mThumbDrawable;
 
     public ExpandSeekBar(Context context) {
         this(context, null);
@@ -31,7 +36,15 @@ public class ExpandSeekBar extends FrameLayout {
 
     public ExpandSeekBar(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        initAttributeSet(attrs);
         initView();
+    }
+
+    private void initAttributeSet(AttributeSet attrs) {
+        TypedArray typedArray = getContext().obtainStyledAttributes(attrs, R.styleable.ExpandSeekBar);
+        mBackgroundHeight = typedArray.getDimensionPixelSize(R.styleable.ExpandSeekBar_background_height, mDefaultBackgroundHeight);
+        mThumbDrawable = typedArray.getDrawable(R.styleable.ExpandSeekBar_thumb);
+        typedArray.recycle();
     }
 
     private void initView() {
@@ -42,13 +55,12 @@ public class ExpandSeekBar extends FrameLayout {
 
     private void initSeekBar() {
         mSeekBar = new SeekBar(getContext());
-        Drawable drawable;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            drawable = getResources().getDrawable(R.drawable.ic_large_thumb, null);
-        } else {
-            drawable = getResources().getDrawable(R.drawable.ic_large_thumb);
+        if (mThumbDrawable != null) {
+            thumbDrawableWidth = mThumbDrawable.getIntrinsicWidth();
+            mSeekBar.setThumb(mThumbDrawable);
         }
-        mSeekBar.setThumb(drawable);
+
+        mSeekBar.setPadding(thumbDrawableWidth / 2, 0, thumbDrawableWidth / 2, 0);
         mSeekBar.setMax(40);
 
         //设置 seekbar 背景透明
@@ -57,10 +69,10 @@ public class ExpandSeekBar extends FrameLayout {
 
     private void addBackground() {
         View background = LayoutInflater.from(getContext()).inflate(R.layout.layout_seekbar_background, this, false);
-        LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, dip2px(4));
+        LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, mBackgroundHeight);
         layoutParams.gravity = Gravity.CENTER_VERTICAL;
-        layoutParams.leftMargin = getBackgroundLeftMargin();
-        layoutParams.rightMargin = getBackgroundRightMargin();
+        layoutParams.leftMargin = thumbDrawableWidth / 2;
+        layoutParams.rightMargin = thumbDrawableWidth / 2;
         background.setLayoutParams(layoutParams);
         addView(background);
     }
@@ -69,26 +81,6 @@ public class ExpandSeekBar extends FrameLayout {
         LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
         mSeekBar.setLayoutParams(layoutParams);
         addView(mSeekBar);
-    }
-
-    private int getBackgroundLeftMargin() {
-        return getSeekBarPaddingLeft() + getThunbOffset() / 2;
-    }
-
-    private int getBackgroundRightMargin() {
-        return getSeekBarPaddingRight() + getThunbOffset() / 2;
-    }
-
-    public int getThunbOffset() {
-        return mSeekBar.getThumbOffset();
-    }
-
-    private int getSeekBarPaddingLeft() {
-        return mSeekBar.getPaddingLeft();
-    }
-
-    private int getSeekBarPaddingRight() {
-        return mSeekBar.getPaddingRight();
     }
 
     private int dip2px(float dipValue) {
